@@ -9,7 +9,7 @@ $(function() {
   // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
   // is the user playing against the computer?
-  var roboPlayer = false;
+  var roboPlayer = true;
   // jQuery element for the robo player checkbox
   var checkbox = $('#robo-player');
 
@@ -140,6 +140,7 @@ $(function() {
 
   // render the player's move by filling in the appropriate circle
   var renderMove = function(columnNumber, columnKey, fillColor) {
+    console.log("---------------");
     var filledCircleId = "";
     $('.col' + columnNumber + '.row' + availableCircles[columnKey]).attr("fill", fillColor);
     filledCircleId = columnNumber.toString() + availableCircles[columnKey].toString();
@@ -149,7 +150,7 @@ $(function() {
 
   // use the id of the newly filled circle to assign it to the active player
   var trackMove = function(filledCircleId) {
-    console.log("move by player " + player.active);
+    // console.log("move by player " + player.active);
     // create the newly filled circle object
     var filledCircle = new FilledCircle(player.active, filledCircleId.toString());
     // increment the total number of filled circles
@@ -189,16 +190,16 @@ $(function() {
           }
         }
       }
-      // return the setToCheck for buildConnectionChains to use
+      // return the setToCheck for var arr = buildConnectionChains to use(setToCheck, player);
       return setToCheck;
   }
 
-  var buildConnectionChains = function(setToCheck, player) {
+  var buildConnectionChains = function(setToCheck, player) {(setToCheck, player);
     for (var circle in setToCheck) {
       var circleBeingChecked = setToCheck[circle];
       if (circleBeingChecked.matchingNeighbors.length < 1) {
         // the circle has no neighbors of hte same color
-        console.log("no matching neighbors for circle " + circleBeingChecked.id);
+        // console.log("no matching neighbors for circle " + circleBeingChecked.id);
       } else {
         // for every neighbor
         for (var i = 0; i < circleBeingChecked.matchingNeighbors.length; i++) {
@@ -269,6 +270,31 @@ $(function() {
     }
     // return boolean of whether there was a win or not
     return winner;
+  }
+
+  // calculate and look for triplet sequences
+  var checkForTripletChain = function(increment, chain) {
+    // assume no triplet
+    var triplet = false;
+    // for every circle
+    for (var i = 0; i < chain.length; i++) {
+      // start with the value of the circle's id; this works because of the way the circles are assigned ids in the HTML 
+      // the smallest value is in the lower left corner and they get larger first as you go up, then as you go right
+      var startValue = parseInt(chain[i]);
+      // empty the array of winning values
+      var tripletValues = [];
+      // calculate the winning values for the given start value (the current neighbor id)
+      tripletValues = [startValue + increment, startValue + (2 * increment)];
+      var potentialWinner = startValue + (3 * increment);
+      // if all the winning values are present in the neighbor chain, the player has won
+      if (chain.includes(tripletValues[0].toString()) && chain.includes(tripletValues[1].toString())) {
+        // player has a triplet, set triplet to TRUE, break for loop
+        triplet = true;
+        return potentialWinner;
+      }
+    }
+    // return boolean of whether there was a win or not
+    return potentialWinner;
   }
 
   // swap the active player
@@ -472,9 +498,10 @@ $(function() {
         } else {
           fillColor = colorTwo;
         }
-        playConnectFour(columnNumber, columnKey, fillColor, circleId, circleObj, setOfCirclesToCheck, chains);
+        // console.log(availableCircles);
+        var columnPlayed = playConnectFour(columnNumber, columnKey, fillColor, circleId, circleObj, setOfCirclesToCheck, chains);
         if (!gameOver && roboPlayer) {
-          setTimeout(makeRandomMove, 500);
+          setTimeout(makeRandomMove(columnPlayed), 500);
         }
       }
     })
@@ -486,9 +513,10 @@ $(function() {
 
   // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-  var makeRandomMove = function() {
-    makeCalculatedMove();
-    var columnNumber = Math.floor(Math.random() * (8 - 1)) + 1;
+  var makeRandomMove = function(target) {
+    chooseRoboMove();
+    // var columnNumber = Math.floor(Math.random() * (8 - 1)) + 1;
+    var columnNumber = generateWeightedRandomColumnNumber(target);
     var columnKey = '';
     var fillColor = '';
     var circleId;
@@ -496,34 +524,195 @@ $(function() {
     var setOfCirclesToCheck;
     var chains;
     playConnectFour(columnNumber, columnKey, fillColor, circleId, circleObj, setOfCirclesToCheck, chains);
-    
   }
 
-  var makeCalculatedMove = function() {
-    var checkPlayerOneCircles = [];
-    for (var circle in playerOneCircles) {
-      var circleToExamine = playerOneCircles[circle];
-      checkPlayerOneCircles.push(parseInt(circleToExamine.id));
+  var getAvailableCircles = function() {
+    var arr = [];
+    for (var item in availableCircles) {
+      var itemValue = availableCircles[item];
+      arr.push(itemValue);
     }
-    console.log(checkPlayerOneCircles);
+    // console.log(arr);
+    return arr;
+  }
 
-    var cozy = calculateNeighborCircleIds(checkPlayerOneCircles[0]);
-    cozy.sort();
-    console.log(cozy);
-    var sliced = cozy[0].toString().slice(0,1);
-    // for (var i = 0; i < cozy.length; i++) {
-    //   var st = cozy[i].toString();
-    //   var col = st.slice(0,1);
-    //   console.log(col);
-    //   sliced.push(col);
-    // }
-    // var reduced = sliced.filter(removeDuplicates);
-    // console.log(reduced);
-    // var min = reduced[0];
-    // var max = reduced[reduced.length - 1];
-    console.log(sliced);
+  var getPlayerOneCircles = function() {
+    var arr = [];
+    for (var circle in playerOneCircles) {
+      var circleName = playerOneCircles[circle];
+      arr.push(circleName.id);
+    }
+    // console.log(arr);
+    return arr;
+  }
 
-    console.log("-----------");
+  var getRoboPlayerChains = function(setToCheck, player) {
+    var arr = buildConnectionChains(setToCheck, player);
+    console.log(arr[1]);
+  }
+
+  var getTargetAreas = function(arrayOfCircleIds) {
+    // console.log(arrayOfCircleIds);
+    var arr = [];
+    for (var i = 0; i < arrayOfCircleIds.length; i++) {
+      // console.log(arrayOfCircleIds[i]);
+      var neighbors = calculateNeighborCircleIds(parseInt(arrayOfCircleIds[i]));
+      for (var j = 0; j < neighbors.length; j++) {
+        // console.log(neighbors[j]);
+        arr.push(neighbors[j]);
+      }
+    }
+    // console.log(arr);
+    return arr;
+  }
+
+  var chooseRoboMove = function() {
+    var columnNumber = 0;
+    // pseudo code here
+    var horizontalChainIncrement = 10;
+    var verticalChainIncrement = 1;
+    var diagonalDownChainIncrement = 9;
+    var diagonalUpChainIncrement = 11;
+    // does robo have a chain of 3?
+    var roboChains = getRoboPlayerChains(playerTwoCircles, 2);
+    // given a direction and a chain, check for a triplet sequence
+    var horizontalWinner = checkForTripletChain(horizontalChainIncrement, roboChains);
+    var verticalWinner = checkForTripletChain(verticalChainIncrement, roboChains);
+    var diagonalDownWinner = checkForTripletChain(diagonalDownChainIncrement, roboChains);
+    var diagonalUpWinner = checkForTripletChain(diagonalUpChainIncrement, roboChains);
+    // if yes, get the id of the potential fourth circle
+    if (horizontalWinner > 0) {
+      columnNumber = horizontalWinner;
+    }
+    if (verticalWinner > 0) {
+      columnNumber = verticalWinner;
+    }
+    if (diagonalDownWinner > 0) {
+      columnNumber = diagonalDownWinner;
+    }
+    if (diagonalUpWinner > 0) {
+      columnNumber = diagonalUpWinner;
+    }
+    // is that circle available?
+    // if yes, choose that circle
+    // else
+    // get ids of available circles
+    var openSpots = getAvailableCircles();
+    // get ids of player one's circles
+    var opponentCircles = getPlayerOneCircles();
+    // get neighbors of those circles
+    var targetAreas = getTargetAreas(opponentCircles);
+    // remove duplicates
+    var reducedTargets = targetAreas.filter(removeDuplicates);
+    reducedTargets.sort();
+    console.log(reducedTargets);
+    // remove circles that are not available
+    // check to see if player one has any chains
+    // how long are those chains?
+    // if a chain of 3 exists, get the id of the potential fourth circle
+    // is that circle available?
+    // if yes, choose that circle
+    // else, look for chains of 2 to block
+    // else, be random: columnNumber = Math.floor(Math.random() * (8 - 1)) + 1;
+    return columnNumber;
+  }
+
+  // target is the column number of the last move by player one
+  var generateWeightedRandomColumnNumber = function(target) {
+    console.log("target: " + target);
+    // the higher the ceiling, the more likely the robo player is to play in a left or right neighboring column
+    var ceiling = 15;
+    // "left" is the column to the left of the last move by player one
+    // if the player chose the leftmost column, left will be undefined
+    var left;
+    if (target > 1) {
+      left = target - 1;
+    }
+    // "right" is the column to the left of the last move by player one
+    // if the player chose the rightmost column, right will be undefined
+    var right;
+    if (target < 7) {
+      right = target + 1;
+    }
+    // array to hold the possible target columns
+    var possibleTargets = [1,2,3,4,5,6,7];
+    // if left is defined, we will remove that column from the array
+    var removeLeft = possibleTargets.filter(function(e) { 
+      if (left) {
+        return e !== left;
+      } else {
+        return e;
+      }
+    })
+    // if right is defined, we will remove that column from the array
+    var removeRight = removeLeft.filter(function(e) { 
+      if (right) {
+        return e !== right;
+      } else {
+        return e;
+      }
+    })
+    // get a random number between zero and the ceiling
+    var rand = Math.floor(Math.random() * (ceiling - 1)) + 1;
+    // initialize a column number to pass around
+    var columnNumber = 0;
+    console.log("array after left and right removal: ")
+    console.log(removeRight);
+    // left edge
+    // right edge
+    // central column
+    if (target === 1) {
+      columnNumber = assignWeightedValuesEdgeCase(rand, removeRight, right);
+    } else if (target === 7) {
+      columnNumber = assignWeightedValuesEdgeCase(rand, removeRight, left);
+    } else {
+      columnNumber = assignWeightedValues(rand, ceiling, removeRight, left, right);
+    }
+    // this column number should now be random, but with a higher chance of being the column to either side of player one's last move
+    console.log("col number: " + columnNumber);
+    return columnNumber;
+  }
+
+  var assignWeightedValuesEdgeCase = function(rand, array, nextDoor) {
+    var temp;
+    if (rand === 1) {
+      temp = array[0];
+    } else if (rand === 2) {
+      temp = array[1];
+    } else if (rand === 3) {
+      temp = array[2];
+    } else if (rand === 4) {
+      temp = array[3];
+    } else if (rand === 5) {
+      temp = array[4];
+    } else if (rand === 6) {
+      temp = array[5];
+    } else {
+      temp = nextDoor;
+    }
+    return temp;
+  }
+
+  var assignWeightedValues = function(rand, ceiling, array, leftNeighbor, rightNeighbor) {
+    var temp;
+    var lowBound = array.length;
+    var midBound = ceiling - (ceiling - array.length) / 2;
+    if (rand === 1) {
+      temp = array[0];
+    } else if (rand === 2) {
+      temp = array[1];
+    } else if (rand === 3) {
+      temp = array[2];
+    } else if (rand === 4) {
+      temp = array[3];
+    } else if (rand === 5) {
+      temp = array[4];
+    } else if (lowBound < rand < midBound) {
+      temp = leftNeighbor;
+    } else {
+      temp = rightNeighbor;
+    }
+    return temp;
   }
   
   
