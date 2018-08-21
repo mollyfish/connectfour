@@ -1,0 +1,211 @@
+<!doctype html>
+<html class="no-js" lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title>Connect Four!</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="apple-touch-icon" href="icon.png">
+  <!-- Place favicon.ico in the root directory -->
+
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+
+<body>
+  <!--[if lte IE 9]>
+    <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
+  <![endif]-->
+
+  <!-- Add your site or application content here -->
+  <h1>Connect Four!</h1>
+  <section id="colors">
+    <label for="color-picker">Choose a color for Player One: <input type="color" name="color-picker-player-one" id="color-picker-player-one" value="#1018FF"></label>
+    <label for="color-picker">Choose a color for Player Two: <input type="color" name="color-picker-player-two" id="color-picker-player-two" value="#FF0000"></label>
+    <p>Computer color: <span class="ghost-box"><span id="computer-color"></span></span></p>
+    <label for="robo-player">Play against computer: <input type="checkbox" name="robo-player" id="robo-player" value="" /></label>
+  </section>
+  <section id="gameplay">
+    <h2>Active Player: <span id="active-player"></span></h2>
+    <div id="gameboard">
+      <div id="row7">
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="17" class="row7 col1" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="27" class="row7 col2" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="37" class="row7 col3" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="47" class="row7 col4" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="57" class="row7 col5" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="67" class="row7 col6" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="77" class="row7 col7" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+      </div>
+      <div id="row6">
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="16" class="row6 col1" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="26" class="row6 col2" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="36" class="row6 col3" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="46" class="row6 col4" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="56" class="row6 col5" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="66" class="row6 col6" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="76" class="row6 col7" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+      </div>
+      <div id="row5">
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="15" class="row5 col1" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="25" class="row5 col2" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="35" class="row5 col3" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="45" class="row5 col4" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="55" class="row5 col5" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="65" class="row5 col6" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="75" class="row5 col7" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+      </div>
+      <div id="row4">
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="14" class="row4 col1" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="24" class="row4 col2" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="34" class="row4 col3" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="44" class="row4 col4" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="54" class="row4 col5" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="64" class="row4 col6" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="74" class="row4 col7" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+      </div>
+      <div id="row3">
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="13" class="row3 col1" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="23" class="row3 col2" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="33" class="row3 col3" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="43" class="row3 col4" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="53" class="row3 col5" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="63" class="row3 col6" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="73" class="row3 col7" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+      </div>
+      <div id="row2">
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="12" class="row2 col1" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="22" class="row2 col2" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="32" class="row2 col3" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="42" class="row2 col4" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="52" class="row2 col5" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="62" class="row2 col6" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="72" class="row2 col7" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+      </div>
+      <div id="row1">
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="11" class="row1 col1" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="21" class="row1 col2" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="31" class="row1 col3" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="41" class="row1 col4" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="51" class="row1 col5" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="61" class="row1 col6" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+        <svg class="box" viewBox="0 0 42 42">
+          <circle id="71" class="row1 col7" cx="21" cy="21" r="20" stroke="#000" stroke-width="1" fill="white" />
+        </svg>
+      </div>
+    </div>
+  </section>
+  <section>
+    <button class="hidden" id="play-again">Play Again</button>
+  </section>
+
+
+
+  <script
+  src="https://code.jquery.com/jquery-3.3.1.min.js"
+  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+  crossorigin="anonymous"></script>
+  <script src="js/app.js"></script>  
+  <script src="js/logic.js"></script>  
+</body>
+</html>
