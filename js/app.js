@@ -146,8 +146,6 @@ $(function() {
 
   // render the player's move by filling in the appropriate circle
   var renderMove = function(columnNumber, columnKey, fillColor) {
-    console.log("move by player " + player.active);
-    console.log("---------------");
     var filledCircleId = "";
     $('.col' + columnNumber + '.row' + availableCircles[columnKey]).attr("fill", fillColor);
     filledCircleId = columnNumber.toString() + availableCircles[columnKey].toString();
@@ -157,7 +155,7 @@ $(function() {
 
   // use the id of the newly filled circle to assign it to the active player
   var trackMove = function(filledCircleId) {
-    // console.log("move by player " + player.active);
+    console.log("move by player " + player.active);
     // create the newly filled circle object
     var filledCircle = new FilledCircle(player.active, filledCircleId.toString());
     // increment the total number of filled circles
@@ -206,7 +204,7 @@ $(function() {
       var circleBeingChecked = setToCheck[circle];
       if (circleBeingChecked.matchingNeighbors.length < 1) {
         // the circle has no neighbors of hte same color
-        // console.log("no matching neighbors for circle " + circleBeingChecked.id);
+        console.log("no matching neighbors for circle " + circleBeingChecked.id);
       } else {
         // for every neighbor
         for (var i = 0; i < circleBeingChecked.matchingNeighbors.length; i++) {
@@ -444,9 +442,18 @@ $(function() {
         console.log("something went wrong!");
     }
     availableCircles[columnKey] = availableCircles[columnKey] + 1;
-    // console.log(availableCircles);
     return columnNumber;
   }
+
+  // ##################################################################################
+  // ##################################################################################
+  // ##################################################################################
+
+  // guts of gameplay!
+
+  // ##################################################################################
+  // ##################################################################################
+  // ##################################################################################
 
   // this listener is attached to the circle SVGs and tracks which column they are in
   var columnClickListener = function(element) {
@@ -476,7 +483,6 @@ $(function() {
         } else {
           fillColor = colorTwo;
         }
-        // console.log(availableCircles);
         var columnPlayed = playConnectFour(columnNumber, columnKey, fillColor, circleId, circleObj, setOfCirclesToCheck, chains);
         if (!gameOver && roboPlayer) {
           setTimeout(makeRandomMove(columnPlayed), 500);
@@ -492,7 +498,6 @@ $(function() {
   // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
   var makeRandomMove = function(target) {
-    console.log(target);
     var col = chooseRoboMove(target);
     // var columnNumber = Math.floor(Math.random() * (8 - 1)) + 1;
     // var columnNumber = generateWeightedRandomColumnNumber(target);
@@ -512,7 +517,6 @@ $(function() {
       var itemValue = availableCircles[item];
       arr.push(itemValue);
     }
-    // console.log(arr);
     return arr;
   }
 
@@ -522,22 +526,17 @@ $(function() {
       var circleName = playerOneCircles[circle];
       arr.push(circleName.id);
     }
-    // console.log(arr);
     return arr;
   }
 
   var getTargetAreas = function(arrayOfCircleIds) {
-    // console.log(arrayOfCircleIds);
     var arr = [];
     for (var i = 0; i < arrayOfCircleIds.length; i++) {
-      // console.log(arrayOfCircleIds[i]);
       var neighbors = calculateNeighborCircleIds(parseInt(arrayOfCircleIds[i]));
       for (var j = 0; j < neighbors.length; j++) {
-        // console.log(neighbors[j]);
         arr.push(neighbors[j]);
       }
     }
-    // console.log(arr);
     return arr;
   }
 
@@ -550,8 +549,6 @@ $(function() {
 
   // calculate and look for triplet sequences
   var checkForTripletChain = function(increment, chain) {
-    // console.log("chain");
-    // console.log(chain);
     var potentialWinner = 0;
     // for every circle, if there are any values in chain
     if (chain.length > 2) {
@@ -574,7 +571,6 @@ $(function() {
         if (tripletValues.length === 2 && svgIds.includes((startValue + (3 * increment)))) {
           potentialWinner = startValue + (3 * increment);
           // if all the winning values are present in the neighbor chain, and the potential winner is a valid circle // id, the player has a dangerous triplet
-          // console.log(potentialWinner);
           if (chain.includes(tripletValues[0].toString()) && chain.includes(tripletValues[1].toString())) {
             // player has a triplet, return potentialWinner (id of circle that will complete the chain)
             return potentialWinner;
@@ -586,7 +582,6 @@ $(function() {
   }
 
   var parseCircleIdForColumnNumber = function(circleId) {
-    console.log(circleId);
     var columnNumber = 0;
     columnNumber = circleId.toString().slice(0,1);
     return parseInt(columnNumber);
@@ -601,13 +596,10 @@ $(function() {
     var openSpots = [];
     openSpots = getAvailableCircles();
     var openSpotIds = [];
-    // console.log(openSpots);
     for (var i = 0; i < openSpots.length; i++) {
       var tempId = (i + 1).toString() + openSpots[i].toString();
       openSpotIds.push(tempId);
     }
-    console.log(openSpotIds);
-    console.log("*******");
     
     // does robo have a chain of 3?
     var roboChains = getRoboPlayerChains(playerTwoCircles, 2, 1);
@@ -617,14 +609,6 @@ $(function() {
       var verticalWinnerId = checkForTripletChain(verticalChainIncrement, roboChains);
       var diagonalDownWinnerId = checkForTripletChain(diagonalDownChainIncrement, roboChains);
       var diagonalUpWinnerId = checkForTripletChain(diagonalUpChainIncrement, roboChains);
-      console.log("___");
-      console.log(horizontalWinnerId);
-      console.log("|");
-      console.log(verticalWinnerId);
-      console.log("-_>");
-      console.log(diagonalDownWinnerId);
-      console.log("_->");
-      console.log(diagonalUpWinnerId);
 
       // is the potential winning circle one of the available spots?
       if (openSpotIds.includes(horizontalWinnerId.toString())) {
@@ -655,7 +639,6 @@ $(function() {
       // remove duplicates
       var reducedTargets = targetAreas.filter(removeDuplicates);
       reducedTargets.sort();
-      // console.log(reducedTargets);
       // remove circles that are not available
       // check to see if player one has any chains
       // how long are those chains?
@@ -673,7 +656,6 @@ $(function() {
 
   // target is the column number of the last move by player one
   var generateWeightedRandomColumnNumber = function(target) {
-    // console.log("target: " + target);
     // the higher the ceiling, the more likely the robo player is to play in a left or right neighboring column
     var ceiling = 15;
     // "left" is the column to the left of the last move by player one
@@ -710,8 +692,6 @@ $(function() {
     var rand = Math.floor(Math.random() * (ceiling - 1)) + 1;
     // initialize a column number to pass around
     var columnNumber = 0;
-    // console.log("array after left and right removal: ")
-    // console.log(removeRight);
     // left edge
     // right edge
     // central column
@@ -723,7 +703,6 @@ $(function() {
       columnNumber = assignWeightedValues(rand, ceiling, removeRight, left, right);
     }
     // this column number should now be random, but with a higher chance of being the column to either side of player one's last move
-    // console.log("col number: " + columnNumber);
     return columnNumber;
   }
 
