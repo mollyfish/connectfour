@@ -107,6 +107,8 @@ $(function() {
     }
   }
 
+  
+
   // constructor for building FilledCircle objects to assist in move tracking
   var FilledCircle = function(owner, id) {
     this.owner = owner;
@@ -441,6 +443,7 @@ $(function() {
       default:
         console.log("something went wrong!");
     }
+    // update the available circles object
     availableCircles[columnKey] = availableCircles[columnKey] + 1;
     return columnNumber;
   }
@@ -483,9 +486,12 @@ $(function() {
         } else {
           fillColor = colorTwo;
         }
+        // save the column played
         var columnPlayed = playConnectFour(columnNumber, columnKey, fillColor, circleId, circleObj, setOfCirclesToCheck, chains);
+        // if playing against the computer, execute this code
         if (!gameOver && roboPlayer) {
-          setTimeout(makeRandomMove(columnPlayed), 500);
+          // render robo move after a half-second delay for better UI
+          setTimeout(makeRoboMove(columnPlayed), 500);
         }
       }
     })
@@ -497,20 +503,21 @@ $(function() {
 
   // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-  var makeRandomMove = function(target) {
-    var col = chooseRoboMove(target);
-    // var columnNumber = Math.floor(Math.random() * (8 - 1)) + 1;
-    // var columnNumber = generateWeightedRandomColumnNumber(target);
-    var columnNumber = col;
+  // target is the column that player one chose
+  var makeRoboMove = function(target) {
+    // calculate the best column number
+    var columnNumber = chooseRoboMove(target);
     var columnKey = '';
     var fillColor = '';
     var circleId;
     var circleObj;
     var setOfCirclesToCheck;
     var chains;
+    // robo makes a move
     playConnectFour(columnNumber, columnKey, fillColor, circleId, circleObj, setOfCirclesToCheck, chains);
   }
 
+  // check the value of the avaialable circles object
   var getAvailableCircles = function() {
     var arr = [];
     for (var item in availableCircles) {
@@ -520,6 +527,7 @@ $(function() {
     return arr;
   }
 
+  // check the status of the opponent's circles
   var getPlayerOneCircles = function() {
     var arr = [];
     for (var circle in playerOneCircles) {
@@ -529,6 +537,7 @@ $(function() {
     return arr;
   }
 
+  // get all neighbor circles for all opponent circles
   var getTargetAreas = function(arrayOfCircleIds) {
     var arr = [];
     for (var i = 0; i < arrayOfCircleIds.length; i++) {
@@ -581,16 +590,25 @@ $(function() {
     return 0;
   }
 
+  // take a circle id and return the column number
   var parseCircleIdForColumnNumber = function(circleId) {
     var columnNumber = 0;
     columnNumber = circleId.toString().slice(0,1);
     return parseInt(columnNumber);
   }
-  
 
+  // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+  // this is the function that calculates the best move for the computer to make
+
+  // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  
   var chooseRoboMove = function(target) {
     var columnNumber = 0;
-    // pseudo code here
 
     // get ids of available circles
     var openSpots = [];
@@ -601,8 +619,9 @@ $(function() {
       openSpotIds.push(tempId);
     }
     
-    // does robo have a chain of 3?
+    // check if robo player has a chain of 3
     var roboChains = getRoboPlayerChains(playerTwoCircles, 2, 1);
+    // if any chains exists, look for triplets (3 circles in a row)
     if (roboChains.length > 0) {
       // given a direction and a chain, check for a triplet sequence
       var horizontalWinnerId = checkForTripletChain(horizontalChainIncrement, roboChains);
@@ -628,10 +647,11 @@ $(function() {
         columnNumber = parseCircleIdForColumnNumber(diagonalUpWinnerId);
         return columnNumber;
       }
+    // if no chains or triplets exist
     } else {
-      // else
-      // get ids of available circles
-      var openSpots = getAvailableCircles();
+
+      // INCOMPLETE
+
       // get ids of player one's circles
       var opponentCircles = getPlayerOneCircles();
       // get neighbors of those circles
@@ -646,10 +666,14 @@ $(function() {
       // is that circle available?
       // if yes, choose that circle
       // else, look for chains of 2 to block
+
+      // END INCOMPLETE SECTION
+
       // else, be random: 
       columnNumber = generateWeightedRandomColumnNumber(target);
       return columnNumber;
     }
+    // by default, be random
     columnNumber = generateWeightedRandomColumnNumber(target);
     return columnNumber;
   }
@@ -707,6 +731,10 @@ $(function() {
   }
 
   var assignWeightedValuesEdgeCase = function(rand, array, nextDoor) {
+    // set the columnNumber, giving the neighbor column a higher chance of being chosen
+    // "ceiling" is an arbitrary value set larger than array.length so that the random number
+    // can be generated within a larger range; the extra possibilities are all 'assigned' to 
+    // the column next door so that it will have a higher probability
     var temp;
     if (rand === 1) {
       temp = array[0];
@@ -727,6 +755,10 @@ $(function() {
   }
 
   var assignWeightedValues = function(rand, ceiling, array, leftNeighbor, rightNeighbor) {
+    // set the columnNumber, giving the 2 neighbor columns a higher chance of being chosen
+    // "ceiling" is an arbitrary value set larger than array.length so that the random number
+    // can be generated within a larger range; the extra possibilities are all 'assigned' to 
+    // (and split between) the 2 neighbor columns so that they will have higher probabilities
     var temp;
     var lowBound = array.length;
     var midBound = ceiling - (ceiling - array.length) / 2;
