@@ -8,6 +8,12 @@ $(function() {
 
   // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+  // these are the increments by which circle ids increase across the gameboard
+  var horizontalChainIncrement = 10;
+  var verticalChainIncrement = 1;
+  var diagonalDownChainIncrement = 9;
+  var diagonalUpChainIncrement = 11;
+
   // is the user playing against the computer?
   var roboPlayer = true;
   // jQuery element for the robo player checkbox
@@ -140,6 +146,7 @@ $(function() {
 
   // render the player's move by filling in the appropriate circle
   var renderMove = function(columnNumber, columnKey, fillColor) {
+    console.log("move by player " + player.active);
     console.log("---------------");
     var filledCircleId = "";
     $('.col' + columnNumber + '.row' + availableCircles[columnKey]).attr("fill", fillColor);
@@ -227,12 +234,7 @@ $(function() {
   }
 
   // examine the player's neighbor chain for winning sequences in any direction
-  var examineConnectionChains = function(chain) {
-    // these are the increments by which circle ids will change as you move across the board in various directions
-    var horizontalChainIncrement = 10;
-    var verticalChainIncrement = 1;
-    var diagonalDownChainIncrement = 9;
-    var diagonalUpChainIncrement = 11;
+  var examineConnectionChains = function(chain) {    
     // given a direction and a chain, check for a winning sequence
     var horizontal = checkForChain(horizontalChainIncrement, chain);
     var vertical = checkForChain(verticalChainIncrement, chain);
@@ -270,31 +272,6 @@ $(function() {
     }
     // return boolean of whether there was a win or not
     return winner;
-  }
-
-  // calculate and look for triplet sequences
-  var checkForTripletChain = function(increment, chain) {
-    // assume no triplet
-    var triplet = false;
-    // for every circle
-    for (var i = 0; i < chain.length; i++) {
-      // start with the value of the circle's id; this works because of the way the circles are assigned ids in the HTML 
-      // the smallest value is in the lower left corner and they get larger first as you go up, then as you go right
-      var startValue = parseInt(chain[i]);
-      // empty the array of winning values
-      var tripletValues = [];
-      // calculate the winning values for the given start value (the current neighbor id)
-      tripletValues = [startValue + increment, startValue + (2 * increment)];
-      var potentialWinner = startValue + (3 * increment);
-      // if all the winning values are present in the neighbor chain, the player has won
-      if (chain.includes(tripletValues[0].toString()) && chain.includes(tripletValues[1].toString())) {
-        // player has a triplet, set triplet to TRUE, break for loop
-        triplet = true;
-        return potentialWinner;
-      }
-    }
-    // return boolean of whether there was a win or not
-    return potentialWinner;
   }
 
   // swap the active player
@@ -467,6 +444,7 @@ $(function() {
         console.log("something went wrong!");
     }
     availableCircles[columnKey] = availableCircles[columnKey] + 1;
+    // console.log(availableCircles);
     return columnNumber;
   }
 
@@ -514,9 +492,11 @@ $(function() {
   // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
   var makeRandomMove = function(target) {
-    chooseRoboMove();
+    console.log(target);
+    var col = chooseRoboMove(target);
     // var columnNumber = Math.floor(Math.random() * (8 - 1)) + 1;
-    var columnNumber = generateWeightedRandomColumnNumber(target);
+    // var columnNumber = generateWeightedRandomColumnNumber(target);
+    var columnNumber = col;
     var columnKey = '';
     var fillColor = '';
     var circleId;
@@ -546,11 +526,6 @@ $(function() {
     return arr;
   }
 
-  var getRoboPlayerChains = function(setToCheck, player) {
-    var arr = buildConnectionChains(setToCheck, player);
-    console.log(arr[1]);
-  }
-
   var getTargetAreas = function(arrayOfCircleIds) {
     // console.log(arrayOfCircleIds);
     var arr = [];
@@ -566,60 +541,139 @@ $(function() {
     return arr;
   }
 
-  var chooseRoboMove = function() {
+  // get the chain of adjacent neighbors for a player
+  var getRoboPlayerChains = function(setToCheck, player, index) {
+    // arr is a pair of arrays: index 0 is player one's chains, index 1 is robo player's chains
+    var arr = buildConnectionChains(setToCheck, player);
+    return arr[index];
+  }
+
+  // calculate and look for triplet sequences
+  var checkForTripletChain = function(increment, chain) {
+    // console.log("chain");
+    // console.log(chain);
+    var potentialWinner = 0;
+    // for every circle, if there are any values in chain
+    if (chain.length > 2) {
+      for (var i = 0; i < chain.length; i++) {
+        // start with the value of the circle's id; this works because of the way 
+        // the circles are assigned ids in the HTML: the smallest value is in the lower 
+        // left corner and they get larger first as you go up, then as you go right
+        var startValue = parseInt(chain[i]);
+        // empty the array of triplet values
+        var tripletValues = [];
+        // calculate the triplet values for the given start value (the current neighbor id),
+        // and check to make sure they are not out-of-bounds for the gameboard
+        if (svgIds.includes((startValue + increment))) {
+          tripletValues.push((startValue + increment));
+        }
+        if (svgIds.includes((startValue + (2 * increment)))) {
+          tripletValues.push((startValue + (2 * increment)));
+        }
+        // if the potential triplet would be valid, set the id of the potential winning circle
+        if (tripletValues.length === 2 && svgIds.includes((startValue + (3 * increment)))) {
+          potentialWinner = startValue + (3 * increment);
+          // if all the winning values are present in the neighbor chain, and the potential winner is a valid circle // id, the player has a dangerous triplet
+          // console.log(potentialWinner);
+          if (chain.includes(tripletValues[0].toString()) && chain.includes(tripletValues[1].toString())) {
+            // player has a triplet, return potentialWinner (id of circle that will complete the chain)
+            return potentialWinner;
+          }
+        }
+      }
+    }
+    return 0;
+  }
+
+  var parseCircleIdForColumnNumber = function(circleId) {
+    console.log(circleId);
+    var columnNumber = 0;
+    columnNumber = circleId.toString().slice(0,1);
+    return parseInt(columnNumber);
+  }
+  
+
+  var chooseRoboMove = function(target) {
     var columnNumber = 0;
     // pseudo code here
-    var horizontalChainIncrement = 10;
-    var verticalChainIncrement = 1;
-    var diagonalDownChainIncrement = 9;
-    var diagonalUpChainIncrement = 11;
-    // does robo have a chain of 3?
-    var roboChains = getRoboPlayerChains(playerTwoCircles, 2);
-    // given a direction and a chain, check for a triplet sequence
-    var horizontalWinner = checkForTripletChain(horizontalChainIncrement, roboChains);
-    var verticalWinner = checkForTripletChain(verticalChainIncrement, roboChains);
-    var diagonalDownWinner = checkForTripletChain(diagonalDownChainIncrement, roboChains);
-    var diagonalUpWinner = checkForTripletChain(diagonalUpChainIncrement, roboChains);
-    // if yes, get the id of the potential fourth circle
-    if (horizontalWinner > 0) {
-      columnNumber = horizontalWinner;
-    }
-    if (verticalWinner > 0) {
-      columnNumber = verticalWinner;
-    }
-    if (diagonalDownWinner > 0) {
-      columnNumber = diagonalDownWinner;
-    }
-    if (diagonalUpWinner > 0) {
-      columnNumber = diagonalUpWinner;
-    }
-    // is that circle available?
-    // if yes, choose that circle
-    // else
+
     // get ids of available circles
-    var openSpots = getAvailableCircles();
-    // get ids of player one's circles
-    var opponentCircles = getPlayerOneCircles();
-    // get neighbors of those circles
-    var targetAreas = getTargetAreas(opponentCircles);
-    // remove duplicates
-    var reducedTargets = targetAreas.filter(removeDuplicates);
-    reducedTargets.sort();
-    console.log(reducedTargets);
-    // remove circles that are not available
-    // check to see if player one has any chains
-    // how long are those chains?
-    // if a chain of 3 exists, get the id of the potential fourth circle
-    // is that circle available?
-    // if yes, choose that circle
-    // else, look for chains of 2 to block
-    // else, be random: columnNumber = Math.floor(Math.random() * (8 - 1)) + 1;
+    var openSpots = [];
+    openSpots = getAvailableCircles();
+    var openSpotIds = [];
+    // console.log(openSpots);
+    for (var i = 0; i < openSpots.length; i++) {
+      var tempId = (i + 1).toString() + openSpots[i].toString();
+      openSpotIds.push(tempId);
+    }
+    console.log(openSpotIds);
+    console.log("*******");
+    
+    // does robo have a chain of 3?
+    var roboChains = getRoboPlayerChains(playerTwoCircles, 2, 1);
+    if (roboChains.length > 0) {
+      // given a direction and a chain, check for a triplet sequence
+      var horizontalWinnerId = checkForTripletChain(horizontalChainIncrement, roboChains);
+      var verticalWinnerId = checkForTripletChain(verticalChainIncrement, roboChains);
+      var diagonalDownWinnerId = checkForTripletChain(diagonalDownChainIncrement, roboChains);
+      var diagonalUpWinnerId = checkForTripletChain(diagonalUpChainIncrement, roboChains);
+      console.log("___");
+      console.log(horizontalWinnerId);
+      console.log("|");
+      console.log(verticalWinnerId);
+      console.log("-_>");
+      console.log(diagonalDownWinnerId);
+      console.log("_->");
+      console.log(diagonalUpWinnerId);
+
+      // is the potential winning circle one of the available spots?
+      if (openSpotIds.includes(horizontalWinnerId.toString())) {
+        // if yes, choose that circle
+        columnNumber = parseCircleIdForColumnNumber(horizontalWinnerId);
+        return columnNumber;
+      }
+      if (openSpotIds.includes(verticalWinnerId.toString())) {
+        columnNumber = parseCircleIdForColumnNumber(verticalWinnerId);
+        return columnNumber;
+      }
+      if (openSpotIds.includes(diagonalDownWinnerId.toString())) {
+        columnNumber = parseCircleIdForColumnNumber(diagonalDownWinnerId);
+        return columnNumber;
+      } 
+      if (openSpotIds.includes(diagonalUpWinnerId.toString())) {
+        columnNumber = parseCircleIdForColumnNumber(diagonalUpWinnerId);
+        return columnNumber;
+      }
+    } else {
+      // else
+      // get ids of available circles
+      var openSpots = getAvailableCircles();
+      // get ids of player one's circles
+      var opponentCircles = getPlayerOneCircles();
+      // get neighbors of those circles
+      var targetAreas = getTargetAreas(opponentCircles);
+      // remove duplicates
+      var reducedTargets = targetAreas.filter(removeDuplicates);
+      reducedTargets.sort();
+      // console.log(reducedTargets);
+      // remove circles that are not available
+      // check to see if player one has any chains
+      // how long are those chains?
+      // if a chain of 3 exists, get the id of the potential fourth circle
+      // is that circle available?
+      // if yes, choose that circle
+      // else, look for chains of 2 to block
+      // else, be random: 
+      columnNumber = generateWeightedRandomColumnNumber(target);
+      return columnNumber;
+    }
+    columnNumber = generateWeightedRandomColumnNumber(target);
     return columnNumber;
   }
 
   // target is the column number of the last move by player one
   var generateWeightedRandomColumnNumber = function(target) {
-    console.log("target: " + target);
+    // console.log("target: " + target);
     // the higher the ceiling, the more likely the robo player is to play in a left or right neighboring column
     var ceiling = 15;
     // "left" is the column to the left of the last move by player one
@@ -656,8 +710,8 @@ $(function() {
     var rand = Math.floor(Math.random() * (ceiling - 1)) + 1;
     // initialize a column number to pass around
     var columnNumber = 0;
-    console.log("array after left and right removal: ")
-    console.log(removeRight);
+    // console.log("array after left and right removal: ")
+    // console.log(removeRight);
     // left edge
     // right edge
     // central column
@@ -669,7 +723,7 @@ $(function() {
       columnNumber = assignWeightedValues(rand, ceiling, removeRight, left, right);
     }
     // this column number should now be random, but with a higher chance of being the column to either side of player one's last move
-    console.log("col number: " + columnNumber);
+    // console.log("col number: " + columnNumber);
     return columnNumber;
   }
 
