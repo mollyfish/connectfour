@@ -14,6 +14,8 @@
 
   <link rel="stylesheet" href="css/reset.css">
   <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/celebrate.css">
+  <link rel="stylesheet" href="css/animate.css">
 </head>
 
 <body>
@@ -23,14 +25,19 @@
 
   <!-- Add your site or application content here -->
   <h1>Connect Four!</h1>
+  <h3 id="winner" class="hidden">Game Over</h3>
   <section id="colors">
     <label for="color-picker">Choose a color for Player One: <input type="color" name="color-picker-player-one" id="color-picker-player-one" value="#1018FF"></label>
     <label for="color-picker">Choose a color for Player Two: <input type="color" name="color-picker-player-two" id="color-picker-player-two" value="#FF0000"></label>
     <p>Computer color: <span class="ghost-box"><span id="computer-color"></span></span></p>
     <label for="robo-player">Play against computer: <input type="checkbox" name="robo-player" id="robo-player" value="" /></label>
   </section>
+  <div class="pyro hidden">
+    <div class="before"></div>
+    <div class="after"></div>
+  </div>
   <section id="gameplay">
-    <h2>Active Player: <span id="active-player"></span></h2>
+    <h2 id="active-player">Active Player: <span></span></h2>
     <div id="gameboard">
       <div id="row7">
         <svg class="box" viewBox="0 0 42 42">

@@ -42,8 +42,9 @@ $(function() {
     inactive  : 2
   }
   
-  // jQuery element to use later to display whose turn it is to the user
-  var playerDisplay = $('#active-player');
+  // jQuery elements to use later to display whose turn it is to the user
+  var activePlayer = $('#active-player');
+  var playerDisplay = $('#active-player span');
   playerDisplay.text("One");
   
   // jQuery element to set default color for Player One
@@ -53,7 +54,6 @@ $(function() {
 
   // jQuery element for play again button
   var playAgain = $('#play-again');
- 
   
   // object to track filled circles so that player moves go the lowest open circle in the column that was clicked
   var availableCircles = {
@@ -72,7 +72,7 @@ $(function() {
   }
 
   var hideSetupControls = function() {
-    $('#robo-player').addClass("hidden");
+    $('#robo-player').toggleClass("hidden");
   }
 
   // recolor previously filled circles if user changes color
@@ -107,7 +107,35 @@ $(function() {
     }
   }
 
-  
+  var celebrate = function(d){
+    var elem = $("#gameboard");
+
+    $({deg: 0}).animate({deg: d}, {
+        duration: 1200,
+        step: function(now){
+            elem.css({
+                 transform: "rotate(" + now + "deg)"
+            });
+        }
+    });
+    console.log("Player " + player.active + " WON!");
+    activePlayer.toggleClass('hidden');
+    $('.pyro').toggleClass('hidden');
+    if (player.active === 1 ) {
+      $('#winner').text("Player One Wins!");
+      $('#winner').toggleClass('hidden');
+      $('#winner').toggleClass('animated fadeIn delay-1s');
+    } else if (player.active === 2 && !roboPlayer) {
+      $('#winner').text("Player Two Wins!");
+      $('#winner').toggleClass('hidden');
+      $('#winner').toggleClass('animated fadeIn delay-1s');
+    } else {
+      $('#winner').text("Oh no! You lose!");
+      $('#winner').toggleClass('hidden');
+      $('#winner').toggleClass('animated fadeIn delay-1s');
+    }
+
+}
 
   // constructor for building FilledCircle objects to assist in move tracking
   var FilledCircle = function(owner, id) {
@@ -242,7 +270,7 @@ $(function() {
     var diagonalUp = checkForChain(diagonalUpChainIncrement, chain);
     // if any of the checks reveal a winning sequence, return TRUE
     if (horizontal === true || vertical === true || diagonalDown === true || diagonalUp === true) {
-      console.log("Player " + player.active + " WON!");
+      celebrate(360);
       return true;
     } else {
       return false;
@@ -266,7 +294,7 @@ $(function() {
       if (chain.includes(winningValues[0].toString()) && chain.includes(winningValues[1].toString()) && chain.includes(winningValues[2].toString())) {
         // player has won, set winner to TRUE, break for loop
         winner = true;
-        playAgain.removeClass("hidden");
+        playAgain.toggleClass("hidden");
         break;
       }
     }
@@ -814,7 +842,11 @@ $(function() {
     blankTheBoard();
     roboPlayer = false;
     checkbox.prop("checked", false);
-    $('#robo-player').removeClass("hidden");
+    $('#robo-player').toggleClass("hidden");
+    $('.pyro').toggleClass('hidden');
+    $('#winner').toggleClass('hidden');
+    $('#active-player').toggleClass('hidden');
+    $('#winner').toggleClass('animated fadeIn delay-1s');
     player = {
       active    : 1,
       inactive  : 2
@@ -835,7 +867,7 @@ $(function() {
       colSix     : 1,
       colSeven   : 1
     }
-    $(this).addClass("hidden");
+    $(this).toggleClass("hidden");
     firstClick = 0;
   })
 
