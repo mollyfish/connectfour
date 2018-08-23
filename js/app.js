@@ -555,11 +555,21 @@ $(function() {
     return arr;
   }
 
-  // check the status of the opponent's circles
+  // check the status of player one's circle ids
   var getPlayerOneCircles = function() {
     var arr = [];
     for (var circle in playerOneCircles) {
       var circleName = playerOneCircles[circle];
+      arr.push(circleName.id);
+    }
+    return arr;
+  }
+
+  // check the status of player two's circle ids
+  var getPlayerTwoCircles = function() {
+    var arr = [];
+    for (var circle in playerTwoCircles) {
+      var circleName = playerTwoCircles[circle];
       arr.push(circleName.id);
     }
     return arr;
@@ -680,24 +690,50 @@ $(function() {
 
       // INCOMPLETE
 
-      // get ids of player one's circles
-      var opponentCircles = getPlayerOneCircles();
-      // get neighbors of those circles
-      var targetAreas = getTargetAreas(opponentCircles);
-      // remove duplicates
-      var reducedTargets = targetAreas.filter(removeDuplicates);
-      reducedTargets.sort();
-      // remove circles that are not available
       // check to see if player one has any chains
       // how long are those chains?
       // if a chain of 3 exists, get the id of the potential fourth circle
       // is that circle available?
       // if yes, choose that circle
+
+      // END INCOMPLETE SECTION
+
+      // get ids of robo player's circles
+      var roboPlayerCircles = getPlayerTwoCircles();
+      // get ids of player one's circles
+      var opponentCircles = getPlayerOneCircles();
+      // console.log(opponentCircles);
+      // get neighbors of those circles
+      var targetAreas = getTargetAreas(opponentCircles);
+      // console.log(targetAreas);
+      // remove duplicates
+      var reducedTargets = targetAreas.filter(removeDuplicates);
+      reducedTargets.sort();
+      // console.log('targets:');
+      // console.log(reducedTargets);
+      // console.log('open spots:');
+      // console.log(openSpotIds);
+      // create an array to hold good moves
+      var highPriorityTargets = []
+      // remove circles that are not available
+      for (var i = 0; i < reducedTargets.length; i++) {
+        if (openSpotIds.includes(reducedTargets[i].toString()) && (!roboPlayerCircles.includes(reducedTargets[i].toString()))) {
+          // console.log("this circle would be a good target:");
+          // console.log(reducedTargets[i]);
+          highPriorityTargets.push(reducedTargets[i]);
+        }
+      }
+      console.log(highPriorityTargets);
+      
+
+      // INCOMPLETE
+
       // else, look for chains of 2 to block
 
       // END INCOMPLETE SECTION
 
       // else, be random: 
+
       columnNumber = generateWeightedRandomColumnNumber(target);
       return columnNumber;
     }
