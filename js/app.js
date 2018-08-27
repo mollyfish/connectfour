@@ -555,11 +555,21 @@ $(function() {
     return arr;
   }
 
-  // check the status of the opponent's circles
+  // check the status of player one's circle ids
   var getPlayerOneCircles = function() {
     var arr = [];
     for (var circle in playerOneCircles) {
       var circleName = playerOneCircles[circle];
+      arr.push(circleName.id);
+    }
+    return arr;
+  }
+
+  // check the status of player two's circle ids
+  var getPlayerTwoCircles = function() {
+    var arr = [];
+    for (var circle in playerTwoCircles) {
+      var circleName = playerTwoCircles[circle];
       arr.push(circleName.id);
     }
     return arr;
@@ -578,7 +588,7 @@ $(function() {
   }
 
   // get the chain of adjacent neighbors for a player
-  var getRoboPlayerChains = function(setToCheck, player, index) {
+  var getPlayerChains = function(setToCheck, player, index) {
     // arr is a pair of arrays: index 0 is player one's chains, index 1 is robo player's chains
     var arr = buildConnectionChains(setToCheck, player);
     return arr[index];
@@ -647,8 +657,8 @@ $(function() {
       openSpotIds.push(tempId);
     }
     
-    // check if robo player has a chain of 3
-    var roboChains = getRoboPlayerChains(playerTwoCircles, 2, 1);
+    // check if robo player has a triplet
+    var roboChains = getPlayerChains(playerTwoCircles, 2, 1);
     // if any chains exists, look for triplets (3 circles in a row)
     if (roboChains.length > 0) {
       // given a direction and a chain, check for a triplet sequence
@@ -675,11 +685,51 @@ $(function() {
         columnNumber = parseCircleIdForColumnNumber(diagonalUpWinnerId);
         return columnNumber;
       }
-    // if no chains or triplets exist
-    } else {
+    } 
+    // check to see if player one has any triplets
+    var humanChains = getPlayerChains(playerOneCircles, 1, 0);
+    if (humanChains.length > 0) {      
+          // if any chains exists, look for triplets (3 circles in a row)
 
-      // INCOMPLETE
+      // if (humanChains.length > 0) {
+        // given a direction and a chain, check for a triplet sequence
+        var horizontalWinnerId = checkForTripletChain(horizontalChainIncrement, humanChains);
+        var verticalWinnerId = checkForTripletChain(verticalChainIncrement, humanChains);
+        var diagonalDownWinnerId = checkForTripletChain(diagonalDownChainIncrement, humanChains);
+        var diagonalUpWinnerId = checkForTripletChain(diagonalUpChainIncrement, humanChains);
+        console.log(horizontalWinnerId);
+        console.log(verticalWinnerId);
+        console.log(diagonalDownWinnerId);
+        console.log(diagonalUpWinnerId);
+  
+        // is the potential winning circle one of the available spots?
+        if (openSpotIds.includes(horizontalWinnerId.toString())) {
+          // if yes, choose that circle
+          columnNumber = parseCircleIdForColumnNumber(horizontalWinnerId);
+          return columnNumber;
+        }
+        if (openSpotIds.includes(verticalWinnerId.toString())) {
+          columnNumber = parseCircleIdForColumnNumber(verticalWinnerId);
+          return columnNumber;
+        }
+        if (openSpotIds.includes(diagonalDownWinnerId.toString())) {
+          columnNumber = parseCircleIdForColumnNumber(diagonalDownWinnerId);
+          return columnNumber;
+        } 
+        if (openSpotIds.includes(diagonalUpWinnerId.toString())) {
+          columnNumber = parseCircleIdForColumnNumber(diagonalUpWinnerId);
+          return columnNumber;
+        }
+      // no chains or triplets exist, therefore...
+      // } else {
+      //   console.log('Player 1 does not have any triplets');
+      // }
 
+
+      // END INCOMPLETE SECTION
+
+      // get ids of robo player's circles
+      var roboPlayerCircles = getPlayerTwoCircles();
       // get ids of player one's circles
       var opponentCircles = getPlayerOneCircles();
       // get neighbors of those circles
@@ -687,17 +737,23 @@ $(function() {
       // remove duplicates
       var reducedTargets = targetAreas.filter(removeDuplicates);
       reducedTargets.sort();
+      // create an array to hold good moves
+      var highPriorityTargets = []
       // remove circles that are not available
-      // check to see if player one has any chains
-      // how long are those chains?
-      // if a chain of 3 exists, get the id of the potential fourth circle
-      // is that circle available?
-      // if yes, choose that circle
+      for (var i = 0; i < reducedTargets.length; i++) {
+        if (openSpotIds.includes(reducedTargets[i].toString()) && (!roboPlayerCircles.includes(reducedTargets[i].toString()))) {
+          highPriorityTargets.push(reducedTargets[i]);
+        }
+      }      
+
+      // INCOMPLETE
+
       // else, look for chains of 2 to block
 
       // END INCOMPLETE SECTION
 
       // else, be random: 
+
       columnNumber = generateWeightedRandomColumnNumber(target);
       return columnNumber;
     }
